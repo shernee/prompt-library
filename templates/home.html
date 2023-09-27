@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prompt Library</title>
+</head>
+<body>
+    <h1>Prompt Library</h1>
+    <form method="POST" action="/add_prompt">
+        <label for="prompt">Prompt:</label>
+        <input type="text" name="prompt" required><br>
+        <input type="submit" value="Add Prompt">
+    </form>
+    <h2>Search for Response:</h2>
+    <form id="search-form">
+        <label for="user_prompt">Enter a Prompt:</label>
+        <input type="text" id="user_prompt" name="user_prompt" required>
+        <button type="button" id="search-button">Search</button>
+    </form>
+    <p id="search-result"></p>
+</body>
+<script>
+    document.getElementById("search-button").addEventListener("click", function () {
+        var userPrompt = document.getElementById("user_prompt").value;
+
+        fetch("/search_results", {
+            method: "POST",
+            body: new URLSearchParams({ "user_prompt": userPrompt }),
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        })
+            .then((response) => response.json()) 
+            .then((data) => {
+                document.getElementById("search-result").textContent = data.response;
+            });
+    });
+</script>
+</html>
