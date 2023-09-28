@@ -7,9 +7,10 @@
     <h1>Prompt Library</h1>
     <form method="POST" action="/add_prompt">
         <label for="prompt">Prompt:</label>
-        <input type="text" name="prompt" required><br>
-        <input type="submit" value="Add Prompt">
+        <input type="text" id="prompt" name="prompt" required><br>
+        <button type="button" id="insert-button">Insert</button>
     </form>
+    <p id="insert-result"></p>
     <h2>Search for Response:</h2>
     <form id="search-form">
         <label for="user_prompt">Enter a Prompt:</label>
@@ -22,7 +23,7 @@
     document.getElementById("search-button").addEventListener("click", function () {
         var userPrompt = document.getElementById("user_prompt").value;
 
-        fetch("/search_results", {
+        fetch("/search-results", {
             method: "POST",
             body: new URLSearchParams({ "user_prompt": userPrompt }),
             headers: {
@@ -32,6 +33,21 @@
             .then((response) => response.json()) 
             .then((data) => {
                 document.getElementById("search-result").textContent = data.response;
+            });
+    });
+    document.getElementById("insert-button").addEventListener("click", function () {
+        var prompt = document.getElementById("prompt").value;
+
+        fetch("/add-prompt", {
+            method: "POST",
+            body: new URLSearchParams({ "prompt": prompt }),
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                document.getElementById("insert-result").textContent = data.response;
             });
     });
 </script>
