@@ -8,11 +8,25 @@
     <form method="POST" action="/add_prompt">
         <label for="prompt">Prompt:</label>
         <input type="text" id="prompt" name="prompt" required><br>
+        <label for="prompttype">Prompt Type:</label>
+        <select id="prompttype" name="prompttype">
+            <option value="option1">Template</option>
+            <option value="option2">Instruction</option>
+            <!-- Add more options as needed -->
+        </select>
+        <label for="domain">Domain</label>
+        <select id="domain" name="domain">
+            <option value="value1">Sports</option>
+            <option value="value2">Medicine</option>
+            <option value="value2">Marketing</option>
+            <!-- Add more options as needed -->
+        </select>
+        <br>
         <button type="button" id="insert-button">Insert</button>
     </form>
     <p id="insert-result"></p>
     <h2>Search for Response:</h2>
-    <form id="search-form">
+    <form id="search-form" method="POST" action="/search_results">
         <label for="user_prompt">Enter a Prompt:</label>
         <input type="text" id="user_prompt" name="user_prompt" required>
         <button type="button" id="search-button">Search</button>
@@ -37,10 +51,18 @@
     });
     document.getElementById("insert-button").addEventListener("click", function () {
         var prompt = document.getElementById("prompt").value;
+        var metadata1 = document.getElementById("prompttype").value;
+        var metadata2 = document.getElementById("domain").value;
 
         fetch("/add-prompt", {
             method: "POST",
-            body: new URLSearchParams({ "prompt": prompt }),
+            body: new URLSearchParams(
+                { 
+                    "prompt": prompt,
+                    "prompttype": prompttype,
+                    "domain": domain
+                }
+            ),
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
             },

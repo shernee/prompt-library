@@ -17,6 +17,7 @@ def generate_embedding(prompt):
 def hello_world():
     return render_template('home.html')
 
+
 @app.route("/search-results", methods=["POST"])
 def search_results():
     user_prompt = request.form.get('user_prompt')
@@ -25,29 +26,36 @@ def search_results():
         pinecone.init(api_key=os.environ["PINECONE_API_KEY"], environment="gcp-starter")
         # pinecone.delete_index("prompt-library")
         # pinecone.create_index("prompt-library", dimension=1536, metric="euclidean")
-        index = pinecone.Index(index_name="prompt_library")
+        index = pinecone.Index(index_name="prompt-library")
+        embedding = generate_embedding(user_prompt)
+        response_vector = index.query(
+            vector=embedding,
+            filter={"prompttype": "instruction"}, 
+            top_k=3
+        )
+        print(response_vector)
+        if response_vector:
+            response = response_vector
+        else:
+            response = "No matching response found."
+        # indexes = pinecone.list_indexes()
 
-        # response_vector = index.query(queries=[user_prompt], top_k=1)
-
-        # if response_vector and response_vector[0]['score'] > 0.7:
-        #     response = response_vector[0]['id']
-        # else:
-        #     response = "No matching response found."
-        indexes = pinecone.list_indexes()
-
-        return jsonify({"response": indexes})
+        return jsonify({"response": response})
     else:
         return jsonify({"response": "Please provide a user prompt."})
     
 @app.route("/add-prompt", methods=["POST"])
 def add_prompt():
     prompt = request.form.get('prompt')
+    prompttype = request.form.get('prompttype')
+    domain = request.form.get('domain')
     if prompt:
         embedding = generate_embedding(prompt)
 
         pinecone.init(api_key=os.environ["PINECONE_API_KEY"], environment="gcp-starter")
         index = pinecone.Index(index_name="prompt-library")
-        pinecone_vector = (prompt, embedding)
+        metadata = {"prompttype": prompttype, "domain": domain}
+        pinecone_vector = (prompt, embedding, metadata)
         upsert_count = index.upsert(vectors=[pinecone_vector])['upserted_count']
         index_stats = index.describe_index_stats()
         response = f"Your prompt has been added! Total prompt count {index_stats['total_vector_count']}"
